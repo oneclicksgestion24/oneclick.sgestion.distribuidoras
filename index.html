@@ -3,140 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OneClick Gestión - Preventa</title>
+    <title>OneClick Gestión - Distribuidora</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0f172a; color: white; font-family: sans-serif; }
-        .card-producto { background-color: #ffffff; color: #1e293b; border-radius: 8px; margin-bottom: 10px; padding: 15px; }
-        .btn-cantidad { background-color: #1e293b; color: white; width: 30px; height: 30px; border-radius: 6px; font-weight: bold; }
-        .header-app { background-color: #1e293b; padding: 15px; border-bottom: 2px solid #334155; }
+        .bg-card { background-color: #1e293b; }
+        .btn-plus-minus { background-color: #0f172a; border: 1px solid #334155; width: 32px; height: 32px; border-radius: 6px; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-32">
 
-    <div class="header-app flex justify-between items-center">
+    <div class="p-4 flex justify-between items-center border-b border-slate-800">
         <div>
-            <p class="text-indigo-400 text-xs font-bold uppercase">Vendedor</p>
-            <h1 class="font-bold text-lg" id="vendedor-nombre">Santiago Grassi</h1>
+            <p class="text-indigo-500 text-[10px] font-bold uppercase tracking-widest">Vendedor</p>
+            <h1 class="font-bold text-lg">Santiago Grassi</h1>
         </div>
-        <button class="bg-indigo-600 text-white px-3 py-1 rounded text-xs font-bold flex items-center">
+        <button class="bg-indigo-600 text-white px-3 py-1 rounded text-[10px] font-bold flex items-center">
             <span class="mr-1">+</span> CLIENTE
         </button>
     </div>
 
     <div class="p-4">
-        <select id="cliente-select" class="w-full bg-slate-800 border border-slate-700 p-3 rounded text-sm font-bold appearance-none uppercase tracking-wider">
+        <select id="cliente-select" class="w-full bg-[#1e293b] p-4 rounded text-sm font-bold border-none outline-none">
             <option>-- SELECCIONAR CLIENTE --</option>
-            <option>Almacén Don Pepe</option>
-            <option>Kiosco La Estación</option>
-            <option>Supermercado Central</option>
+            <option>Almacén Los Amigos</option>
+            <option>Kiosco Avenida</option>
+            <option>Mini Super Luna</option>
         </select>
     </div>
 
     <div class="px-4 mb-4">
         <div class="relative">
-            <input type="text" placeholder="Buscar productos..." class="w-full bg-white text-slate-500 p-3 pl-10 rounded-full text-sm outline-none">
+            <input type="text" id="buscador" placeholder="Buscar productos..." class="w-full bg-white text-slate-900 p-3 pl-10 rounded-xl text-sm outline-none">
             <span class="absolute left-4 top-3 text-slate-400">🔍</span>
         </div>
     </div>
 
-    <div id="lista-productos" class="px-4">
+    <div id="contenedor-productos" class="px-4 space-y-2">
         </div>
 
     <div class="fixed bottom-0 left-0 w-full bg-white p-4 flex justify-between items-center border-t border-slate-200">
         <div class="text-center">
             <p class="text-slate-400 text-[10px] font-bold uppercase">Total Venta</p>
-            <p class="text-slate-900 font-bold text-xl" id="display-total">$0</p>
+            <p class="text-slate-900 font-bold text-2xl" id="total-venta">$0</p>
         </div>
-        <button onclick="enviarPedido()" id="btnEnviar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3 rounded-2xl font-bold flex items-center shadow-lg">
-            ENVIAR <span class="ml-2">➤</span>
+        <button onclick="enviarAlExcel()" id="btnEnviar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-12 py-3 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">
+            ENVIAR ➤
         </button>
     </div>
 
     <script>
-        // TU CONFIGURACIÓN
+        // TU CONEXIÓN
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwBx_IbvHH-X671elxalMv00kHLG20o4OdGzDaPyLZDfAm45papl6mdyenrpY9QzYOj/exec';
 
+        // LISTA DE PRODUCTOS
         const productos = [
-            { id: 1, nombre: "Coca Cola 1.5L", precio: 2800, cantidad: 0 },
-            { id: 2, nombre: "Cerveza Lata", precio: 1500, cantidad: 0 },
-            { id: 3, nombre: "Pack Cigarrillos R.", precio: 2200, cantidad: 0 }
+            { id: 1, nombre: "Coca Cola 1.5L", precio: 2800, cant: 0 },
+            { id: 2, nombre: "Cerveza Lata", precio: 1500, cant: 0 },
+            { id: 3, nombre: "Pack Cigarrillos R.", precio: 2200, cant: 0 },
+            { id: 4, nombre: "Agua Mineral 500ml", precio: 900, cant: 0 }
         ];
 
-        function renderProductos() {
-            const container = document.getElementById('lista-productos');
-            container.innerHTML = "";
-            productos.forEach(p => {
-                container.innerHTML += `
-                    <div class="card-producto flex justify-between items-center shadow-sm">
-                        <div>
-                            <h3 class="font-bold text-slate-800">${p.nombre}</h3>
-                            <p class="text-indigo-600 font-bold text-sm">$${p.precio}</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button onclick="cambiarCantidad(${p.id}, -1)" class="btn-cantidad">-</button>
-                            <span class="font-bold text-slate-800">${p.cantidad}</span>
-                            <button onclick="cambiarCantidad(${p.id}, 1)" class="btn-cantidad">+</button>
-                        </div>
+        function render() {
+            const html = productos.map(p => `
+                <div class="bg-white p-4 rounded-xl flex justify-between items-center shadow-sm">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">${p.nombre}</h3>
+                        <p class="text-indigo-600 font-bold text-xs">$${p.precio}</p>
                     </div>
-                `;
-            });
-            actualizarTotal();
+                    <div class="flex items-center gap-3">
+                        <button onclick="update(${p.id}, -1)" class="btn-plus-minus text-white text-sm">-</button>
+                        <span class="font-bold text-slate-900 w-4 text-center">${p.cant}</span>
+                        <button onclick="update(${p.id}, 1)" class="btn-plus-minus text-white text-sm">+</button>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('contenedor-productos').innerHTML = html;
+            
+            const total = productos.reduce((s, p) => s + (p.cant * p.precio), 0);
+            document.getElementById('total-venta').innerText = `$${total}`;
         }
 
-        function cambiarCantidad(id, cambio) {
+        function update(id, val) {
             const p = productos.find(x => x.id === id);
-            p.cantidad = Math.max(0, p.cantidad + cambio);
-            renderProductos();
+            p.cant = Math.max(0, p.cant + val);
+            render();
         }
 
-        function actualizarTotal() {
-            const total = productos.reduce((sum, p) => sum + (p.cantidad * p.precio), 0);
-            document.getElementById('display-total').innerText = `$${total}`;
-        }
-
-        function enviarPedido() {
+        function enviarAlExcel() {
             const btn = document.getElementById('btnEnviar');
             const cliente = document.getElementById('cliente-select').value;
-            const total = document.getElementById('display-total').innerText;
-            const vendedor = document.getElementById('vendedor-nombre').innerText;
-
-            let detalle = productos.filter(p => p.cantidad > 0)
-                                   .map(p => `${p.cantidad}x ${p.nombre}`)
+            const total = document.getElementById('total-venta').innerText;
+            
+            // Armamos el detalle: "2x Coca Cola, 1x Cerveza"
+            const detalle = productos.filter(p => p.cant > 0)
+                                   .map(p => `${p.cant}x ${p.nombre}`)
                                    .join(", ");
 
-            if (cliente === "-- SELECCIONAR CLIENTE --" || total === "$0") {
-                alert("Seleccioná cliente y productos");
+            if (cliente.includes("--") || total === "$0") {
+                alert("Seleccioná un cliente y productos");
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "PROCESANDO...";
+            btn.innerText = "ENVIANDO...";
 
-            // ENVÍO AL EXCEL
+            // MANDAR AL GOOGLE SHEETS
             fetch(scriptURL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    vendedor: vendedor,
+                    vendedor: "Santiago Grassi",
                     cliente: cliente,
                     detalle: detalle,
                     total: total
                 })
             })
             .then(() => {
-                alert("¡Pedido guardado con éxito en el Excel!");
-                location.reload(); // Reiniciar App
+                alert("✅ ¡Pedido registrado!");
+                location.reload(); // Limpiar pantalla
             })
-            .catch(error => {
-                alert("Error al enviar: " + error.message);
+            .catch(err => {
+                alert("Error: " + err);
                 btn.disabled = false;
-                btn.innerText = "REINTENTAR";
             });
         }
 
-        renderProductos();
+        render();
     </script>
 </body>
 </html>
