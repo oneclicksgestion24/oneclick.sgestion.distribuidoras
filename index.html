@@ -1,117 +1,142 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Sistema de Preventa</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="manifest.json">
+    <title>OneClick Gestión - Preventa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Diseño simple y limpio */
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: white; }
-        h2 { color: #333; }
-        input, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
-            display: inline-block; 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-            box-sizing: border-box; 
-        }
-        button { 
-            width: 100%; 
-            background-color: #4CAF50; 
-            color: white; 
-            padding: 14px 20px; 
-            margin: 8px 0; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 16px;
-            font-weight: bold;
-        }
-        button:hover { background-color: #45a049; }
-        button:disabled { background-color: #cccccc; }
-        #status { text-align: center; font-weight: bold; margin-top: 10px; }
+        body { background-color: #0f172a; color: white; font-family: sans-serif; }
+        .card-producto { background-color: #ffffff; color: #1e293b; border-radius: 8px; margin-bottom: 10px; padding: 15px; }
+        .btn-cantidad { background-color: #1e293b; color: white; width: 30px; height: 30px; border-radius: 6px; font-weight: bold; }
+        .header-app { background-color: #1e293b; padding: 15px; border-bottom: 2px solid #334155; }
     </style>
 </head>
-<body>
+<body class="pb-24">
 
-    <h2>Nueva Preventa</h2>
+    <div class="header-app flex justify-between items-center">
+        <div>
+            <p class="text-indigo-400 text-xs font-bold uppercase">Vendedor</p>
+            <h1 class="font-bold text-lg" id="vendedor-nombre">Santiago Grassi</h1>
+        </div>
+        <button class="bg-indigo-600 text-white px-3 py-1 rounded text-xs font-bold flex items-center">
+            <span class="mr-1">+</span> CLIENTE
+        </button>
+    </div>
 
-    <label>Vendedor</label>
-    <input type="text" id="vendedor" placeholder="Tu nombre...">
+    <div class="p-4">
+        <select id="cliente-select" class="w-full bg-slate-800 border border-slate-700 p-3 rounded text-sm font-bold appearance-none uppercase tracking-wider">
+            <option>-- SELECCIONAR CLIENTE --</option>
+            <option>Almacén Don Pepe</option>
+            <option>Kiosco La Estación</option>
+            <option>Supermercado Central</option>
+        </select>
+    </div>
 
-    <label>Cliente</label>
-    <input type="text" id="cliente" placeholder="Nombre del comercio...">
+    <div class="px-4 mb-4">
+        <div class="relative">
+            <input type="text" placeholder="Buscar productos..." class="w-full bg-white text-slate-500 p-3 pl-10 rounded-full text-sm outline-none">
+            <span class="absolute left-4 top-3 text-slate-400">🔍</span>
+        </div>
+    </div>
 
-    <label>Detalle del Pedido</label>
-    <textarea id="detalle" placeholder="Ej: 5 Coca Cola, 2 packs Harina..." rows="4"></textarea>
+    <div id="lista-productos" class="px-4">
+        </div>
 
-    <label>Total $</label>
-    <input type="number" id="total" placeholder="0.00">
-
-    <button onclick="enviarPedido()" id="btnEnviar">GUARDAR PEDIDO</button>
-
-    <p id="status"></p>
+    <div class="fixed bottom-0 left-0 w-full bg-white p-4 flex justify-between items-center border-t border-slate-200">
+        <div class="text-center">
+            <p class="text-slate-400 text-[10px] font-bold uppercase">Total Venta</p>
+            <p class="text-slate-900 font-bold text-xl" id="display-total">$0</p>
+        </div>
+        <button onclick="enviarPedido()" id="btnEnviar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3 rounded-2xl font-bold flex items-center shadow-lg">
+            ENVIAR <span class="ml-2">➤</span>
+        </button>
+    </div>
 
     <script>
-        // EL LINK QUE GENERASTE VOS
+        // TU CONFIGURACIÓN
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwBx_IbvHH-X671elxalMv00kHLG20o4OdGzDaPyLZDfAm45papl6mdyenrpY9QzYOj/exec';
+
+        const productos = [
+            { id: 1, nombre: "Coca Cola 1.5L", precio: 2800, cantidad: 0 },
+            { id: 2, nombre: "Cerveza Lata", precio: 1500, cantidad: 0 },
+            { id: 3, nombre: "Pack Cigarrillos R.", precio: 2200, cantidad: 0 }
+        ];
+
+        function renderProductos() {
+            const container = document.getElementById('lista-productos');
+            container.innerHTML = "";
+            productos.forEach(p => {
+                container.innerHTML += `
+                    <div class="card-producto flex justify-between items-center shadow-sm">
+                        <div>
+                            <h3 class="font-bold text-slate-800">${p.nombre}</h3>
+                            <p class="text-indigo-600 font-bold text-sm">$${p.precio}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="cambiarCantidad(${p.id}, -1)" class="btn-cantidad">-</button>
+                            <span class="font-bold text-slate-800">${p.cantidad}</span>
+                            <button onclick="cambiarCantidad(${p.id}, 1)" class="btn-cantidad">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+            actualizarTotal();
+        }
+
+        function cambiarCantidad(id, cambio) {
+            const p = productos.find(x => x.id === id);
+            p.cantidad = Math.max(0, p.cantidad + cambio);
+            renderProductos();
+        }
+
+        function actualizarTotal() {
+            const total = productos.reduce((sum, p) => sum + (p.cantidad * p.precio), 0);
+            document.getElementById('display-total').innerText = `$${total}`;
+        }
 
         function enviarPedido() {
             const btn = document.getElementById('btnEnviar');
-            const status = document.getElementById('status');
-            
-            // Recolectamos los datos de los cuadritos
-            const data = {
-                vendedor: document.getElementById('vendedor').value,
-                cliente: document.getElementById('cliente').value,
-                detalle: document.getElementById('detalle').value,
-                total: document.getElementById('total').value
-            };
+            const cliente = document.getElementById('cliente-select').value;
+            const total = document.getElementById('display-total').innerText;
+            const vendedor = document.getElementById('vendedor-nombre').innerText;
 
-            // Validamos que no esté vacío
-            if(!data.vendedor || !data.cliente || !data.total) {
-                alert("Por favor, completa los campos");
+            let detalle = productos.filter(p => p.cantidad > 0)
+                                   .map(p => `${p.cantidad}x ${p.nombre}`)
+                                   .join(", ");
+
+            if (cliente === "-- SELECCIONAR CLIENTE --" || total === "$0") {
+                alert("Seleccioná cliente y productos");
                 return;
             }
 
-            // Cambiamos el botón para que sepan que se está enviando
             btn.disabled = true;
-            btn.innerText = "ENVIANDO...";
-            status.innerText = "Conectando con Google Sheets...";
+            btn.innerText = "PROCESANDO...";
 
-            // MANDAR AL EXCEL
+            // ENVÍO AL EXCEL
             fetch(scriptURL, {
                 method: 'POST',
-                mode: 'no-cors', 
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify({
+                    vendedor: vendedor,
+                    cliente: cliente,
+                    detalle: detalle,
+                    total: total
+                })
             })
             .then(() => {
-                // Éxito
-                status.innerText = "✅ ¡Pedido guardado en el Excel!";
-                status.style.color = "green";
-                
-                // Limpiar campos para el próximo pedido
-                document.getElementById('cliente').value = "";
-                document.getElementById('detalle').value = "";
-                document.getElementById('total').value = "";
-                
-                btn.disabled = false;
-                btn.innerText = "GUARDAR PEDIDO";
+                alert("¡Pedido guardado con éxito en el Excel!");
+                location.reload(); // Reiniciar App
             })
             .catch(error => {
-                // Error
-                console.error('Error!', error.message);
-                status.innerText = "❌ Error al enviar. Reintentá.";
-                status.style.color = "red";
+                alert("Error al enviar: " + error.message);
                 btn.disabled = false;
                 btn.innerText = "REINTENTAR";
             });
         }
-    </script>
 
+        renderProductos();
+    </script>
 </body>
 </html>
