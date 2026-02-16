@@ -3,65 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OneClick Gestión - Distribuidora</title>
+    <title>OneClick Gestión - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0f172a; color: white; font-family: sans-serif; }
         .bg-card { background-color: #1e293b; }
-        .btn-plus-minus { background-color: #0f172a; border: 1px solid #334155; width: 32px; height: 32px; border-radius: 6px; }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="pb-32">
+<body>
 
-    <div class="p-4 flex justify-between items-center border-b border-slate-800">
-        <div>
-            <p class="text-indigo-500 text-[10px] font-bold uppercase tracking-widest">Vendedor</p>
-            <h1 class="font-bold text-lg">Santiago Grassi</h1>
-        </div>
-        <button class="bg-indigo-600 text-white px-3 py-1 rounded text-[10px] font-bold flex items-center">
-            <span class="mr-1">+</span> CLIENTE
-        </button>
-    </div>
-
-    <div class="p-4">
-        <select id="cliente-select" class="w-full bg-[#1e293b] p-4 rounded text-sm font-bold border-none outline-none">
-            <option>-- SELECCIONAR CLIENTE --</option>
-            <option>Almacén Los Amigos</option>
-            <option>Kiosco Avenida</option>
-            <option>Mini Super Luna</option>
-        </select>
-    </div>
-
-    <div class="px-4 mb-4">
-        <div class="relative">
-            <input type="text" id="buscador" placeholder="Buscar productos..." class="w-full bg-white text-slate-900 p-3 pl-10 rounded-xl text-sm outline-none">
-            <span class="absolute left-4 top-3 text-slate-400">🔍</span>
+    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center px-6">
+        <div class="w-full max-w-md bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700">
+            <h1 class="text-2xl font-bold text-center mb-2 text-indigo-400">OneClick Gestión</h1>
+            <p class="text-slate-400 text-center text-sm mb-8">Ingresá tus credenciales</p>
+            
+            <div class="space-y-4">
+                <input type="text" id="user-input" placeholder="Usuario" class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 outline-none focus:border-indigo-500">
+                <input type="password" id="pass-input" placeholder="Contraseña" class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 outline-none focus:border-indigo-500">
+                <button onclick="validarLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 p-4 rounded-xl font-bold text-lg mt-4 transition-all">INGRESAR</button>
+            </div>
+            <p id="login-error" class="text-red-400 text-center mt-4 text-sm font-bold"></p>
         </div>
     </div>
 
-    <div id="contenedor-productos" class="px-4 space-y-2">
+    <div id="main-app" class="hidden pb-32">
+        <div class="p-4 flex justify-between items-center border-b border-slate-800">
+            <div>
+                <p class="text-indigo-500 text-[10px] font-bold uppercase tracking-widest">Vendedor</p>
+                <h1 class="font-bold text-lg" id="vendedor-actual">---</h1>
+            </div>
+            <button onclick="cerrarSesion()" class="text-slate-400 text-xs font-bold uppercase">Salir</button>
         </div>
 
-    <div class="fixed bottom-0 left-0 w-full bg-white p-4 flex justify-between items-center border-t border-slate-200">
-        <div class="text-center">
-            <p class="text-slate-400 text-[10px] font-bold uppercase">Total Venta</p>
-            <p class="text-slate-900 font-bold text-2xl" id="total-venta">$0</p>
+        <div class="p-4">
+            <select id="cliente-select" class="w-full bg-[#1e293b] p-4 rounded text-sm font-bold border-none outline-none">
+                <option>-- SELECCIONAR CLIENTE --</option>
+                <option>Almacén Los Amigos</option>
+                <option>Kiosco Avenida</option>
+                <option>Mini Super Luna</option>
+            </select>
         </div>
-        <button onclick="enviarAlExcel()" id="btnEnviar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-12 py-3 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">
-            ENVIAR ➤
-        </button>
+
+        <div id="contenedor-productos" class="px-4 space-y-2"></div>
+
+        <div class="fixed bottom-0 left-0 w-full bg-white p-4 flex justify-between items-center border-t border-slate-200">
+            <div class="text-center text-slate-900">
+                <p class="text-slate-400 text-[10px] font-bold uppercase">Total Venta</p>
+                <p class="font-bold text-2xl" id="total-venta">$0</p>
+            </div>
+            <button onclick="enviarAlExcel()" id="btnEnviar" class="bg-indigo-600 text-white px-12 py-3 rounded-2xl font-bold">ENVIAR ➤</button>
+        </div>
     </div>
 
     <script>
-        // TU CONEXIÓN
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwBx_IbvHH-X671elxalMv00kHLG20o4OdGzDaPyLZDfAm45papl6mdyenrpY9QzYOj/exec';
 
-        // LISTA DE PRODUCTOS
+        // LISTA DE VENDEDORES (Podés agregar más acá)
+        const usuariosValidos = [
+            { user: "santiago", pass: "1234", nombre: "Santiago Grassi" },
+            { user: "admin", pass: "admin2026", nombre: "Administrador" }
+        ];
+
+        let vendedorLogueado = "";
+
+        function validarLogin() {
+            const u = document.getElementById('user-input').value;
+            const p = document.getElementById('pass-input').value;
+            const errorMsg = document.getElementById('login-error');
+
+            const encontrado = usuariosValidos.find(x => x.user === u && x.pass === p);
+
+            if (encontrado) {
+                vendedorLogueado = encontrado.nombre;
+                document.getElementById('vendedor-actual').innerText = vendedorLogueado;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                render();
+            } else {
+                errorMsg.innerText = "Usuario o clave incorrectos";
+            }
+        }
+
+        function cerrarSesion() {
+            location.reload();
+        }
+
+        // --- EL RESTO DE TU LÓGICA DE PRODUCTOS ---
         const productos = [
             { id: 1, nombre: "Coca Cola 1.5L", precio: 2800, cant: 0 },
             { id: 2, nombre: "Cerveza Lata", precio: 1500, cant: 0 },
-            { id: 3, nombre: "Pack Cigarrillos R.", precio: 2200, cant: 0 },
-            { id: 4, nombre: "Agua Mineral 500ml", precio: 900, cant: 0 }
+            { id: 3, nombre: "Pack Cigarrillos R.", precio: 2200, cant: 0 }
         ];
 
         function render() {
@@ -72,14 +104,13 @@
                         <p class="text-indigo-600 font-bold text-xs">$${p.precio}</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button onclick="update(${p.id}, -1)" class="btn-plus-minus text-white text-sm">-</button>
-                        <span class="font-bold text-slate-900 w-4 text-center">${p.cant}</span>
-                        <button onclick="update(${p.id}, 1)" class="btn-plus-minus text-white text-sm">+</button>
+                        <button onclick="update(${p.id}, -1)" class="bg-slate-900 text-white w-8 h-8 rounded">-</button>
+                        <span class="font-bold text-slate-900">${p.cant}</span>
+                        <button onclick="update(${p.id}, 1)" class="bg-slate-900 text-white w-8 h-8 rounded">+</button>
                     </div>
                 </div>
             `).join('');
             document.getElementById('contenedor-productos').innerHTML = html;
-            
             const total = productos.reduce((s, p) => s + (p.cant * p.precio), 0);
             document.getElementById('total-venta').innerText = `$${total}`;
         }
@@ -94,43 +125,30 @@
             const btn = document.getElementById('btnEnviar');
             const cliente = document.getElementById('cliente-select').value;
             const total = document.getElementById('total-venta').innerText;
-            
-            // Armamos el detalle: "2x Coca Cola, 1x Cerveza"
-            const detalle = productos.filter(p => p.cant > 0)
-                                   .map(p => `${p.cant}x ${p.nombre}`)
-                                   .join(", ");
+            const detalle = productos.filter(p => p.cant > 0).map(p => `${p.cant}x ${p.nombre}`).join(", ");
 
-            if (cliente.includes("--") || total === "$0") {
-                alert("Seleccioná un cliente y productos");
-                return;
-            }
+            if (cliente.includes("--") || total === "$0") { alert("Cargá cliente y productos"); return; }
 
             btn.disabled = true;
             btn.innerText = "ENVIANDO...";
 
-            // MANDAR AL GOOGLE SHEETS
             fetch(scriptURL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    vendedor: "Santiago Grassi",
+                    vendedor: vendedorLogueado,
                     cliente: cliente,
                     detalle: detalle,
                     total: total
                 })
             })
             .then(() => {
-                alert("✅ ¡Pedido registrado!");
-                location.reload(); // Limpiar pantalla
+                alert("✅ ¡Pedido de " + vendedorLogueado + " guardado!");
+                location.reload();
             })
-            .catch(err => {
-                alert("Error: " + err);
-                btn.disabled = false;
-            });
+            .catch(err => { alert("Error: " + err); btn.disabled = false; });
         }
-
-        render();
     </script>
 </body>
 </html>
