@@ -15,7 +15,7 @@
 
     <div id="login-section" class="min-h-screen flex items-center justify-center p-6 text-center">
         <div class="w-full max-w-md bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700">
-            <h1 class="text-2xl font-bold text-indigo-400 mb-6">OneClick Login</h1>
+            <h1 class="text-2xl font-bold text-indigo-400 mb-6 uppercase tracking-widest">OneClick Login</h1>
             <input type="text" id="userInput" placeholder="Usuario" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 outline-none focus:border-indigo-500">
             <input type="password" id="passInput" placeholder="Contraseña" class="w-full p-4 mb-6 rounded-xl bg-slate-900 border border-slate-700 outline-none focus:border-indigo-500">
             <button onclick="login()" id="loginBtn" class="w-full bg-indigo-600 p-4 rounded-xl font-bold text-lg hover:bg-indigo-700 active:scale-95 transition-all">INGRESAR</button>
@@ -25,39 +25,38 @@
     <div id="main-app" class="hidden pb-32">
         <div class="p-6 flex justify-between items-center border-b border-slate-800">
             <div>
-                <p class="text-indigo-500 text-[10px] font-bold uppercase">Vendedor</p>
+                <p class="text-indigo-500 text-[10px] font-bold uppercase tracking-tighter">Vendedor</p>
                 <h2 id="vendedorNom" class="font-bold text-xl"></h2>
             </div>
-            <button onclick="agregarCliente()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md">+ CLIENTE</button>
+            <button onclick="agregarCliente()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md hover:bg-indigo-700 active:scale-95 transition-all">+ CLIENTE</button>
         </div>
 
         <div class="px-6 py-4">
             <select id="clienteSelect" class="w-full bg-slate-800 p-4 rounded-xl font-bold text-sm outline-none border border-slate-700">
                 <option>-- SELECCIONAR CLIENTE --</option>
-                <option>CLIENTE GENERAL</option>
             </select>
         </div>
 
         <div id="lista-productos" class="px-6 space-y-2">
             </div>
 
-        <div class="px-6 mt-4">
-            <button onclick="agregarProductoManual()" class="w-full border-2 border-dashed border-slate-700 p-4 rounded-xl text-slate-500 font-bold">
-                + AGREGAR PRODUCTO MANUAL
+        <div class="px-6 mt-6">
+            <button onclick="agregarProductoManual()" class="w-full border-2 border-dashed border-slate-700 p-4 rounded-xl text-slate-500 font-bold hover:text-indigo-400 hover:border-indigo-400 transition-all">
+                + AGREGAR PRODUCTO NUEVO
             </button>
         </div>
 
-        <div class="fixed bottom-0 left-0 w-full bg-white p-6 flex justify-between items-center border-t shadow-lg">
+        <div class="fixed bottom-0 left-0 w-full bg-white p-6 flex justify-between items-center border-t shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
             <div class="text-center text-slate-900">
-                <p class="text-slate-400 text-[10px] font-bold uppercase">Total Venta</p>
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-tighter">Total Venta</p>
                 <p id="totalDisplay" class="font-bold text-3xl">$0</p>
             </div>
-            <button onclick="enviarPedido()" id="sendBtn" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl active:scale-95">ENVIAR ➤</button>
+            <button onclick="enviarPedido()" id="sendBtn" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all">ENVIAR ➤</button>
         </div>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbya3bQckku1rKVCmmRDKxnWN0b8II5MftFZWKZOdRCtoyfo9a3bUjQfymPyNRkvX4zD/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxbfRaLdzx8M0Fz9xlcUTxMQ95Y0hvYS-APDDtDhFEyIdFQGtQQs7C0QL4BOYAzyAaX/exec';
         let vendedorActual = "";
         let productos = [];
 
@@ -74,35 +73,52 @@
                 document.getElementById('vendedorNom').innerText = user.toUpperCase();
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                cargarProductos();
+                cargarDatos();
             });
         }
 
-        function cargarProductos() {
+        function cargarDatos() {
             fetch(scriptURL)
             .then(res => res.json())
             .then(data => {
-                productos = data.map((p, i) => ({ id: i, nombre: p.nombre, precio: p.precio, cant: 0 }));
+                productos = data.productos.map((p, i) => ({ id: i, nombre: p.nombre, precio: p.precio, cant: 0 }));
                 render();
+                
+                const select = document.getElementById('clienteSelect');
+                select.innerHTML = '<option>-- SELECCIONAR CLIENTE --</option>';
+                data.clientes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.text = c.toUpperCase();
+                    select.add(opt);
+                });
             });
         }
 
+        // FUNCIONALIDAD BOTÓN +CLIENTE
         function agregarCliente() {
-            const nuevo = prompt("Nombre del cliente:");
-            if (nuevo) {
-                const select = document.getElementById('clienteSelect');
-                const opt = document.createElement('option');
-                opt.text = nuevo.toUpperCase();
-                select.add(opt);
-                select.value = opt.text;
-            }
+            const nuevo = prompt("Nombre del nuevo cliente:");
+            if (!nuevo) return;
+
+            const select = document.getElementById('clienteSelect');
+            const opt = document.createElement('option');
+            opt.text = nuevo.toUpperCase();
+            select.add(opt);
+            select.value = opt.text;
+
+            // Lo guarda en el Excel
+            fetch(scriptURL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify({ tipo: 'NUEVO_CLIENTE', nombre: nuevo.toUpperCase() }) 
+            });
         }
 
+        // FUNCIONALIDAD BOTÓN AGREGAR PRODUCTO NUEVO
         function agregarProductoManual() {
             const nom = prompt("Nombre del producto:");
-            const pre = prompt("Precio:");
+            const pre = prompt("Precio de venta:");
             if(nom && pre) {
-                productos.push({ id: productos.length, nombre: nom, precio: parseFloat(pre), cant: 1 });
+                productos.push({ id: productos.length, nombre: nom.toUpperCase(), precio: parseFloat(pre), cant: 1 });
                 render();
             }
         }
@@ -111,16 +127,15 @@
             const container = document.getElementById('lista-productos');
             container.innerHTML = productos.map(p => `
                 <div class="card-item">
-                    <div><h3 class="font-bold text-sm">${p.nombre}</h3><p class="text-indigo-600 font-bold text-xs">$${p.precio}</p></div>
+                    <div><h3 class="font-bold text-sm text-slate-800">${p.nombre}</h3><p class="text-indigo-600 font-bold text-xs">$${p.precio}</p></div>
                     <div class="flex items-center gap-4">
-                        <button onclick="cambiar(${p.id},-1)" class="bg-slate-200 w-8 h-8 rounded-lg font-bold">-</button>
-                        <span class="font-bold w-4 text-center">${p.cant}</span>
+                        <button onclick="cambiar(${p.id},-1)" class="bg-slate-100 w-8 h-8 rounded-lg font-bold text-slate-900 border border-slate-200">-</button>
+                        <span class="font-bold w-4 text-center text-slate-900 text-lg">${p.cant}</span>
                         <button onclick="cambiar(${p.id},1)" class="bg-slate-900 text-white w-8 h-8 rounded-lg font-bold">+</button>
                     </div>
                 </div>
             `).join('');
-            const total = productos.reduce((acc, p) => acc + (p.cant * p.precio), 0);
-            document.getElementById('totalDisplay').innerText = `$${total}`;
+            actualizarTotal();
         }
 
         function cambiar(id, n) {
@@ -129,14 +144,19 @@
             render();
         }
 
+        function actualizarTotal() {
+            const total = productos.reduce((acc, p) => acc + (p.cant * p.precio), 0);
+            document.getElementById('totalDisplay').innerText = `$${total}`;
+        }
+
         function enviarPedido() {
             const cli = document.getElementById('clienteSelect').value;
             const det = productos.filter(p => p.cant > 0).map(p => `${p.cant}x ${p.nombre}`).join(", ");
-            if(cli.includes("--") || det === "") return alert("Seleccioná cliente y productos");
+            if(cli.includes("--") || det === "") return alert("Seleccioná cliente y cargá productos");
 
             document.getElementById('sendBtn').innerText = "ENVIANDO...";
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ vendedor: vendedorActual, cliente: cli, detalle: det, total: document.getElementById('totalDisplay').innerText }) })
-            .then(() => { alert("Pedido Guardado"); location.reload(); });
+            .then(() => { alert("Pedido guardado con éxito"); location.reload(); });
         }
     </script>
 </body>
