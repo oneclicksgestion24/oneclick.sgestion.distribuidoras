@@ -1,38 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ONECLICK.SGESTION - DISTRIBUIDORA</title>
+    <title>Sistema de Preventa</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        input, textarea { width: 100%; margin-bottom: 10px; padding: 8px; display: block; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-        button:disabled { background-color: #ccc; }
+        /* Diseño simple y limpio */
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: white; }
+        h2 { color: #333; }
+        input, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            display: inline-block; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+        }
+        button { 
+            width: 100%; 
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 14px 20px; 
+            margin: 8px 0; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover { background-color: #45a049; }
+        button:disabled { background-color: #cccccc; }
+        #status { text-align: center; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <h2>Nueva Preventa</h2>
 
-    <input type="text" id="vendedor" placeholder="Vendedor">
-    <input type="text" id="cliente" placeholder="Cliente">
-    <textarea id="detalle" placeholder="Detalle del pedido" rows="4"></textarea>
-    <input type="number" id="total" placeholder="Total $">
+    <label>Vendedor</label>
+    <input type="text" id="vendedor" placeholder="Tu nombre...">
 
-    <button onclick="enviarPedido()" id="btnEnviar">ENVIAR PEDIDO</button>
+    <label>Cliente</label>
+    <input type="text" id="cliente" placeholder="Nombre del comercio...">
 
-    <p id="mensaje"></p>
+    <label>Detalle del Pedido</label>
+    <textarea id="detalle" placeholder="Ej: 5 Coca Cola, 2 packs Harina..." rows="4"></textarea>
+
+    <label>Total $</label>
+    <input type="number" id="total" placeholder="0.00">
+
+    <button onclick="enviarPedido()" id="btnEnviar">GUARDAR PEDIDO</button>
+
+    <p id="status"></p>
 
     <script>
-        // Tu link de Google Sheets que ya funciona
+        // EL LINK QUE GENERASTE VOS
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwBx_IbvHH-X671elxalMv00kHLG20o4OdGzDaPyLZDfAm45papl6mdyenrpY9QzYOj/exec';
 
         function enviarPedido() {
             const btn = document.getElementById('btnEnviar');
-            const msg = document.getElementById('mensaje');
-
+            const status = document.getElementById('status');
+            
+            // Recolectamos los datos de los cuadritos
             const data = {
                 vendedor: document.getElementById('vendedor').value,
                 cliente: document.getElementById('cliente').value,
@@ -40,36 +71,47 @@
                 total: document.getElementById('total').value
             };
 
+            // Validamos que no esté vacío
             if(!data.vendedor || !data.cliente || !data.total) {
-                alert("Completa los datos");
+                alert("Por favor, completa los campos");
                 return;
             }
 
+            // Cambiamos el botón para que sepan que se está enviando
             btn.disabled = true;
-            btn.innerText = "Enviando...";
-            msg.innerText = "Cargando en Excel...";
+            btn.innerText = "ENVIANDO...";
+            status.innerText = "Conectando con Google Sheets...";
 
+            // MANDAR AL EXCEL
             fetch(scriptURL, {
                 method: 'POST',
-                mode: 'no-cors',
+                mode: 'no-cors', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
             .then(() => {
-                msg.innerText = "¡Pedido guardado!";
-                // Limpiar campos
+                // Éxito
+                status.innerText = "✅ ¡Pedido guardado en el Excel!";
+                status.style.color = "green";
+                
+                // Limpiar campos para el próximo pedido
                 document.getElementById('cliente').value = "";
                 document.getElementById('detalle').value = "";
                 document.getElementById('total').value = "";
+                
                 btn.disabled = false;
-                btn.innerText = "ENVIAR PEDIDO";
+                btn.innerText = "GUARDAR PEDIDO";
             })
             .catch(error => {
-                msg.innerText = "Error al enviar";
+                // Error
+                console.error('Error!', error.message);
+                status.innerText = "❌ Error al enviar. Reintentá.";
+                status.style.color = "red";
                 btn.disabled = false;
                 btn.innerText = "REINTENTAR";
             });
         }
     </script>
+
 </body>
 </html>
