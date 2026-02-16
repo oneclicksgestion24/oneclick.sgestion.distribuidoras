@@ -3,34 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OneClick Pro - Sistema de Gestión</title>
+    <title>OneClick Pro - Gestión</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: white; font-family: system-ui, sans-serif; touch-action: manipulation; }
+        body { background-color: #0f172a; color: white; font-family: sans-serif; touch-action: manipulation; }
         .hidden { display: none !important; }
-        .card-item { background: white; border-radius: 20px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; color: #1e293b; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .modal-overlay { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px); }
-        #sugerencias { border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #e2e8f0; }
+        .modal-overlay { background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); }
+        .card-item { background: white; border-radius: 20px; padding: 15px; margin-bottom: 10px; color: #1e293b; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #sugerencias { border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #cbd5e1; }
     </style>
 </head>
 <body>
 
     <div id="login-section" class="min-h-screen flex items-center justify-center p-6">
-        <div class="w-full max-w-md bg-slate-800/50 p-10 rounded-[40px] border border-slate-700/50 text-center backdrop-blur-md">
+        <div class="w-full max-w-md bg-slate-800 p-10 rounded-[40px] text-center border border-slate-700 shadow-2xl">
             <h1 class="text-4xl font-black text-indigo-400 mb-2 italic">OneClick</h1>
-            <p class="text-slate-500 text-[10px] mb-10 font-bold uppercase tracking-[0.3em]">Gestión de Ventas</p>
-            <div class="space-y-4">
-                <input type="text" id="userInput" placeholder="Usuario" class="w-full p-5 rounded-2xl bg-slate-900 border border-slate-700 outline-none text-white focus:border-indigo-500">
-                <input type="password" id="passInput" placeholder="Contraseña" class="w-full p-5 rounded-2xl bg-slate-900 border border-slate-700 outline-none text-white focus:border-indigo-500">
-                <button onclick="login()" id="loginBtn" class="w-full bg-indigo-600 p-5 rounded-2xl font-black text-lg active:scale-95 transition-all">INGRESAR</button>
-            </div>
+            <p class="text-slate-500 text-[10px] mb-10 font-bold uppercase tracking-widest">Sistema de Ventas</p>
+            <input type="text" id="userInput" placeholder="Usuario" class="w-full p-5 mb-4 rounded-2xl bg-slate-900 border border-slate-700 outline-none text-white">
+            <input type="password" id="passInput" placeholder="Contraseña" class="w-full p-5 mb-8 rounded-2xl bg-slate-900 border border-slate-700 outline-none text-white">
+            <button onclick="login()" id="loginBtn" class="w-full bg-indigo-600 p-5 rounded-2xl font-black text-lg active:scale-95 transition-all">INGRESAR</button>
         </div>
     </div>
 
     <div id="main-app" class="hidden pb-48">
         <div class="p-6 flex justify-between items-center border-b border-slate-800 sticky top-0 bg-[#0f172a] z-40">
             <div>
-                <p class="text-indigo-500 text-[10px] font-black uppercase tracking-widest">Vendedor</p>
+                <p class="text-indigo-500 text-[10px] font-black uppercase">Vendedor</p>
                 <h2 id="vendedorNom" class="font-bold text-xl uppercase"></h2>
             </div>
             <button onclick="abrirModal('modalCli')" class="bg-indigo-600 px-6 py-3 rounded-2xl text-xs font-black shadow-lg">+ CLIENTE</button>
@@ -41,21 +39,20 @@
                 <option value="">-- SELECCIONAR CLIENTE --</option>
             </select>
             <div id="infoExtra" class="mt-4 p-5 bg-indigo-600/10 rounded-2xl border border-indigo-500/20 text-xs hidden">
-                <p id="txtDir" class="text-slate-300"></p>
-                <p id="txtTel" class="text-indigo-400 font-black mt-2"></p>
+                <p id="txtDir"></p><p id="txtTel" class="text-indigo-400 font-black mt-2"></p>
             </div>
         </div>
 
         <div class="px-6 mb-4 relative">
-            <input type="text" id="buscador" oninput="filtrarProds()" placeholder="🔍 Buscar producto..." class="w-full p-5 rounded-3xl text-slate-900 font-bold shadow-2xl outline-none focus:ring-4 ring-indigo-500/20">
-            <div id="sugerencias" class="absolute left-6 right-6 bg-white text-slate-800 z-50 hidden max-h-72 overflow-y-auto mt-2"></div>
+            <input type="text" id="buscador" oninput="filtrarProds()" placeholder="🔍 Buscar producto..." class="w-full p-5 rounded-3xl text-slate-900 font-bold shadow-2xl outline-none">
+            <div id="sugerencias" class="absolute left-6 right-6 bg-white text-slate-800 z-50 hidden max-h-64 overflow-y-auto mt-2 border border-slate-200"></div>
         </div>
 
         <div id="lista-pedido" class="px-6 space-y-3"></div>
 
         <div class="fixed bottom-0 left-0 w-full bg-white p-8 flex justify-between items-center rounded-t-[40px] shadow-2xl z-30">
             <div class="text-slate-900">
-                <p class="text-slate-400 text-[10px] font-bold uppercase">Total</p>
+                <p class="text-slate-400 text-[10px] font-bold">TOTAL</p>
                 <p id="totalDisplay" class="font-black text-4xl tracking-tighter">$0</p>
             </div>
             <button onclick="enviarPedido()" id="btnSend" class="bg-indigo-600 text-white px-12 py-5 rounded-[20px] font-black text-lg">ENVIAR ➤</button>
@@ -64,10 +61,10 @@
 
     <div id="modalCli" class="fixed inset-0 modal-overlay flex items-center justify-center p-6 hidden z-[100]">
         <div class="bg-slate-800 w-full max-w-sm p-8 rounded-[40px] border border-slate-700 shadow-2xl">
-            <h3 class="text-2xl font-black mb-6">Nuevo Cliente</h3>
-            <input type="text" id="insNom" placeholder="Nombre completo" class="w-full p-5 mb-3 bg-slate-900 rounded-2xl border border-slate-700 outline-none">
-            <input type="text" id="insDir" placeholder="Dirección" class="w-full p-5 mb-3 bg-slate-900 rounded-2xl border border-slate-700 outline-none">
-            <input type="text" id="insTel" placeholder="WhatsApp" class="w-full p-5 mb-6 bg-slate-900 rounded-2xl border border-slate-700 outline-none">
+            <h3 class="text-2xl font-black mb-6 text-white">Nuevo Cliente</h3>
+            <input type="text" id="insNom" placeholder="Nombre" class="w-full p-5 mb-3 bg-slate-900 rounded-2xl border border-slate-700 outline-none text-white">
+            <input type="text" id="insDir" placeholder="Dirección" class="w-full p-5 mb-3 bg-slate-900 rounded-2xl border border-slate-700 outline-none text-white">
+            <input type="text" id="insTel" placeholder="WhatsApp" class="w-full p-5 mb-6 bg-slate-900 rounded-2xl border border-slate-700 outline-none text-white">
             <div class="flex gap-3">
                 <button onclick="cerrarModal('modalCli')" class="flex-1 p-5 bg-slate-700 rounded-2xl font-bold text-slate-400">Cerrar</button>
                 <button onclick="guardarCliente()" class="flex-1 p-5 bg-indigo-600 rounded-2xl font-bold">Guardar</button>
@@ -76,29 +73,29 @@
     </div>
 
     <script>
-        // TU LINK ACTUALIZADO
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbw3rIRWtnj_OuY8vHWbke6b5VMLmezHkcn5pgzjZmPG4nZdvg75TmqmE-253BCGskFV/exec';
+        // EL NUEVO LINK QUE PASASTE
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzL2uud4ORsqkuCpSaMyCL6BMIVk_UeldUkcK7F4O2XYE5Gz0QKDsB6dkhNEAZg2FT2/exec';
         let vendedorActual = "";
         let productosDB = [];
         let clientesDB = [];
         let pedidoActual = [];
 
         function login() {
-            const u = document.getElementById('userInput').value;
-            const p = document.getElementById('passInput').value;
-            if(!u || !p) return;
+            const user = document.getElementById('userInput').value;
+            const pass = document.getElementById('passInput').value;
+            if(!user || !pass) return;
             document.getElementById('loginBtn').innerText = "CONECTANDO...";
             
             fetch(scriptURL).then(res => res.json()).then(data => {
                 productosDB = data.productos;
                 clientesDB = data.clientes;
-                vendedorActual = u;
-                document.getElementById('vendedorNom').innerText = u;
+                vendedorActual = user;
+                document.getElementById('vendedorNom').innerText = user;
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 actualizarSelectClientes();
             }).catch(e => {
-                alert("Error al cargar datos del Excel");
+                alert("Error de conexión. Verifica los permisos del Script en Google Sheets.");
                 document.getElementById('loginBtn').innerText = "INGRESAR";
             });
         }
@@ -127,22 +124,22 @@
             } else { box.classList.add('hidden'); }
         }
 
-        // LÓGICA DE BÚSQUEDA SIN CONFLICTO VISUAL
         function filtrarProds() {
             const query = document.getElementById('buscador').value.toLowerCase().trim();
             const sug = document.getElementById('sugerencias');
             
             if(query.length < 1) { 
                 sug.classList.add('hidden'); 
-                sug.innerHTML = ""; // Limpiamos contenido
+                sug.innerHTML = ""; 
                 return; 
             }
 
             const filtrados = productosDB.filter(p => p.nombre.toLowerCase().includes(query));
             
             if(filtrados.length > 0) {
+                // Limpiamos el contenido previo para evitar lo que pasaba en tu imagen image_a4f2ac.png
                 sug.innerHTML = filtrados.map(p => `
-                    <div onclick="sumarAlPedido('${p.nombre}', ${p.precio})" class="p-5 border-b border-slate-50 active:bg-slate-100 cursor-pointer">
+                    <div onclick="sumarAlPedido('${p.nombre}', ${p.precio})" class="p-5 border-b border-slate-100 active:bg-slate-100 cursor-pointer">
                         <p class="font-black text-slate-800 text-sm">${p.nombre.toUpperCase()}</p>
                         <p class="text-indigo-600 font-bold text-xs mt-1">$${p.precio}</p>
                     </div>
@@ -166,7 +163,7 @@
         function renderPedido() {
             const cont = document.getElementById('lista-pedido');
             if(pedidoActual.length === 0) {
-                cont.innerHTML = '<div class="text-center py-20 opacity-20"><p class="font-bold">Pedido vacío</p></div>';
+                cont.innerHTML = '<div class="text-center py-20 opacity-20"><p class="font-bold tracking-widest text-xs">EL PEDIDO ESTÁ VACÍO</p></div>';
                 document.getElementById('totalDisplay').innerText = "$0";
                 return;
             }
