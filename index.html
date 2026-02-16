@@ -3,148 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OneClick Gestión - Distribuidora</title>
+    <title>OneClick Gestión</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0f172a; color: white; font-family: sans-serif; }
         .hidden { display: none; }
-        .card-item { background-color: #ffffff; border-radius: 12px; margin-bottom: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn-inc { background-color: #0f172a; color: white; width: 32px; height: 32px; border-radius: 8px; font-weight: bold; }
+        .card-item { background-color: #ffffff; border-radius: 12px; padding: 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #1e293b; }
     </style>
 </head>
-<body class="bg-[#0f172a]">
+<body>
 
-    <div id="login-section" class="min-h-screen flex items-center justify-center p-6">
+    <div id="login-section" class="min-h-screen flex items-center justify-center p-6 text-center">
         <div class="w-full max-w-md bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700">
-            <h1 class="text-2xl font-bold text-center mb-6 text-indigo-400 tracking-tight">OneClick Gestión</h1>
-            <div class="space-y-4">
-                <input type="text" id="userInput" placeholder="Usuario (ej: santiago)" class="w-full p-4 rounded-2xl bg-slate-900 border border-slate-700 outline-none focus:border-indigo-500 transition-all">
-                <input type="password" id="passInput" placeholder="Contraseña (ej: 1234)" class="w-full p-4 rounded-2xl bg-slate-900 border border-slate-700 outline-none focus:border-indigo-500 transition-all">
-                <button onclick="login()" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 p-4 rounded-2xl font-bold text-lg mt-4 shadow-lg active:scale-95 transition-all">INGRESAR</button>
-            </div>
-            <p id="errorMsg" class="text-red-400 text-center mt-4 font-medium hidden">Credenciales incorrectas</p>
+            <h1 class="text-2xl font-bold text-indigo-400 mb-6">OneClick Login</h1>
+            <input type="text" id="userInput" placeholder="Usuario" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 outline-none focus:border-indigo-500">
+            <input type="password" id="passInput" placeholder="Contraseña" class="w-full p-4 mb-6 rounded-xl bg-slate-900 border border-slate-700 outline-none focus:border-indigo-500">
+            <button onclick="login()" id="loginBtn" class="w-full bg-indigo-600 p-4 rounded-xl font-bold text-lg hover:bg-indigo-700 active:scale-95 transition-all">INGRESAR</button>
         </div>
     </div>
 
-    <div id="main-app" class="hidden pb-24">
-        <div class="p-6 flex justify-between items-center">
+    <div id="main-app" class="hidden pb-32">
+        <div class="p-6 flex justify-between items-center border-b border-slate-800">
             <div>
-                <p class="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Vendedor</p>
+                <p class="text-indigo-500 text-[10px] font-bold uppercase">Vendedor</p>
                 <h2 id="vendedorNom" class="font-bold text-xl"></h2>
             </div>
-            <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md hover:bg-indigo-700">+ CLIENTE</button>
+            <button onclick="agregarCliente()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md">+ CLIENTE</button>
         </div>
 
-        <div class="px-6 mb-4">
-            <select id="clienteSelect" class="w-full bg-slate-800 p-4 rounded-xl font-bold text-sm border-none outline-none ring-1 ring-slate-700 focus:ring-indigo-500">
+        <div class="px-6 py-4">
+            <select id="clienteSelect" class="w-full bg-slate-800 p-4 rounded-xl font-bold text-sm outline-none border border-slate-700">
                 <option>-- SELECCIONAR CLIENTE --</option>
-                <option>Almacén Los Amigos</option>
-                <option>Kiosco Avenida</option>
-                <option>Mini Super Luna</option>
+                <option>CLIENTE GENERAL</option>
             </select>
         </div>
 
-        <div class="px-6 mb-6">
-            <div class="relative">
-                <input type="text" placeholder="Buscar productos..." class="w-full bg-white text-slate-900 p-4 pl-12 rounded-2xl text-sm outline-none shadow-xl">
-                <span class="absolute left-4 top-4 text-slate-400 opacity-50 text-lg">🔍</span>
+        <div id="lista-productos" class="px-6 space-y-2">
             </div>
+
+        <div class="px-6 mt-4">
+            <button onclick="agregarProductoManual()" class="w-full border-2 border-dashed border-slate-700 p-4 rounded-xl text-slate-500 font-bold">
+                + AGREGAR PRODUCTO MANUAL
+            </button>
         </div>
 
-        <div id="lista-productos" class="px-6 space-y-2 text-slate-900">
-            </div>
-
-        <div class="fixed bottom-0 left-0 w-full bg-white p-6 flex justify-between items-center border-t border-slate-200 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-            <div class="text-center">
+        <div class="fixed bottom-0 left-0 w-full bg-white p-6 flex justify-between items-center border-t shadow-lg">
+            <div class="text-center text-slate-900">
                 <p class="text-slate-400 text-[10px] font-bold uppercase">Total Venta</p>
-                <p id="totalDisplay" class="text-slate-900 font-bold text-3xl">$0</p>
+                <p id="totalDisplay" class="font-bold text-3xl">$0</p>
             </div>
-            <button onclick="enviarPedido()" id="sendBtn" class="bg-indigo-600 text-white px-12 py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-indigo-700 active:scale-95 transition-all">
-                ENVIAR ➤
-            </button>
+            <button onclick="enviarPedido()" id="sendBtn" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl active:scale-95">ENVIAR ➤</button>
         </div>
     </div>
 
     <script>
-        // TU LINK DE GOOGLE (El de la imagen 9a0cc6)
-        const scriptURL = 'REEMPLAZA_ESTO_POR_TU_LINK_EXEC';
-
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbya3bQckku1rKVCmmRDKxnWN0b8II5MftFZWKZOdRCtoyfo9a3bUjQfymPyNRkvX4zD/exec';
         let vendedorActual = "";
-        const productos = [
-            { id: 1, nombre: "Coca Cola 1.5L", precio: 2800, cant: 0 },
-            { id: 2, nombre: "Cerveza Lata", precio: 1500, cant: 0 },
-            { id: 3, nombre: "Pack Cigarrillos R.", precio: 2200, cant: 0 }
-        ];
+        let productos = [];
 
         function login() {
             const user = document.getElementById('userInput').value;
             const pass = document.getElementById('passInput').value;
-            const btn = document.getElementById('loginBtn');
-            
-            btn.innerText = "VERIFICANDO...";
+            if(!user || !pass) return alert("Completá los campos");
 
-            fetch(scriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ tipo: 'LOGIN', user: user, pass: pass })
-            }).then(() => {
-                // Como usamos no-cors no podemos leer la respuesta, pero si cargaste los datos en el Script:
+            document.getElementById('loginBtn').innerText = "VERIFICANDO...";
+            
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipo: 'LOGIN', user: user, pass: pass }) })
+            .then(() => {
                 vendedorActual = user;
                 document.getElementById('vendedorNom').innerText = user.toUpperCase();
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
+                cargarProductos();
+            });
+        }
+
+        function cargarProductos() {
+            fetch(scriptURL)
+            .then(res => res.json())
+            .then(data => {
+                productos = data.map((p, i) => ({ id: i, nombre: p.nombre, precio: p.precio, cant: 0 }));
                 render();
             });
+        }
+
+        function agregarCliente() {
+            const nuevo = prompt("Nombre del cliente:");
+            if (nuevo) {
+                const select = document.getElementById('clienteSelect');
+                const opt = document.createElement('option');
+                opt.text = nuevo.toUpperCase();
+                select.add(opt);
+                select.value = opt.text;
+            }
+        }
+
+        function agregarProductoManual() {
+            const nom = prompt("Nombre del producto:");
+            const pre = prompt("Precio:");
+            if(nom && pre) {
+                productos.push({ id: productos.length, nombre: nom, precio: parseFloat(pre), cant: 1 });
+                render();
+            }
         }
 
         function render() {
             const container = document.getElementById('lista-productos');
             container.innerHTML = productos.map(p => `
                 <div class="card-item">
-                    <div>
-                        <h3 class="font-bold text-sm text-slate-800">${p.nombre}</h3>
-                        <p class="text-indigo-600 font-bold text-xs">$${p.precio}</p>
-                    </div>
+                    <div><h3 class="font-bold text-sm">${p.nombre}</h3><p class="text-indigo-600 font-bold text-xs">$${p.precio}</p></div>
                     <div class="flex items-center gap-4">
-                        <button onclick="cambiar(${p.id}, -1)" class="btn-inc text-white">-</button>
-                        <span class="font-bold text-slate-800 w-4 text-center">${p.cant}</span>
-                        <button onclick="cambiar(${p.id}, 1)" class="btn-inc text-white">+</button>
+                        <button onclick="cambiar(${p.id},-1)" class="bg-slate-200 w-8 h-8 rounded-lg font-bold">-</button>
+                        <span class="font-bold w-4 text-center">${p.cant}</span>
+                        <button onclick="cambiar(${p.id},1)" class="bg-slate-900 text-white w-8 h-8 rounded-lg font-bold">+</button>
                     </div>
                 </div>
             `).join('');
-            
             const total = productos.reduce((acc, p) => acc + (p.cant * p.precio), 0);
             document.getElementById('totalDisplay').innerText = `$${total}`;
         }
 
-        function cambiar(id, num) {
+        function cambiar(id, n) {
             const p = productos.find(x => x.id === id);
-            p.cant = Math.max(0, p.cant + num);
+            p.cant = Math.max(0, p.cant + n);
             render();
         }
 
         function enviarPedido() {
             const cli = document.getElementById('clienteSelect').value;
-            const total = document.getElementById('totalDisplay').innerText;
             const det = productos.filter(p => p.cant > 0).map(p => `${p.cant}x ${p.nombre}`).join(", ");
-
-            if(cli.includes("--") || det === "") return alert("Faltan datos");
+            if(cli.includes("--") || det === "") return alert("Seleccioná cliente y productos");
 
             document.getElementById('sendBtn').innerText = "ENVIANDO...";
-            
-            fetch(scriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({
-                    vendedor: vendedorActual,
-                    cliente: cli,
-                    detalle: det,
-                    total: total
-                })
-            }).then(() => {
-                alert("✅ Pedido guardado en Excel");
-                location.reload();
-            });
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ vendedor: vendedorActual, cliente: cli, detalle: det, total: document.getElementById('totalDisplay').innerText }) })
+            .then(() => { alert("Pedido Guardado"); location.reload(); });
         }
     </script>
 </body>
